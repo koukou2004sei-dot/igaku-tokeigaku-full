@@ -1,0 +1,226 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医学統計学 問題集</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'UD Shin Go Pro','A-OTF UD新ゴ Pro','UD新ゴ コンデンス90 L','UDShinGoPro-Regular','Noto Sans JP',sans-serif;background:#fff;color:#111;min-height:100vh;line-height:1.7;font-size:14px}
+.hdr{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:2px solid #111;padding:12px 20px}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.hdr h1{font-size:1.15rem;font-weight:700}
+.stats{font-size:.8rem;color:#666;display:flex;gap:14px}
+.ctrls{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.btn{padding:6px 14px;border:1px solid #111;border-radius:4px;background:#fff;color:#111;font-size:.78rem;font-family:inherit;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:hover{background:#111;color:#fff}
+.btn-fill{background:#111;color:#fff}
+.btn-fill:hover{background:#333}
+.fbar{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.fb{padding:3px 10px;border:1px solid #999;border-radius:14px;background:#fff;color:#666;font-size:.74rem;font-family:inherit;cursor:pointer;transition:all .15s}
+.fb:hover{border-color:#111;color:#111}
+.fb.on{background:#111;color:#fff;border-color:#111}
+.tc{padding:10px 20px 50px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead th{position:sticky;top:0;z-index:10;background:#f5f5f5;padding:8px 12px;text-align:left;font-size:.75rem;font-weight:700;letter-spacing:.03em;color:#555;border-bottom:2px solid #111}
+thead th:first-child{width:80px}
+thead th:nth-child(2){width:auto}
+thead th:nth-child(3){width:100px}
+thead th:nth-child(4){width:100px}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:#f9f9f9}
+td{padding:9px 12px;border-bottom:1px solid #ddd;vertical-align:top;font-size:.84rem}
+.rb{display:inline-block;padding:2px 8px;border:1px solid #111;border-radius:3px;font-size:.72rem;font-weight:700;white-space:nowrap;text-align:center}
+.qt{white-space:pre-wrap;word-break:break-word;line-height:1.75}
+.ac{cursor:pointer;user-select:none;min-height:30px}
+.av{padding:4px 8px;border-radius:3px;font-weight:700;font-size:.88rem;transition:all .2s;display:inline-block}
+.ah .av{background:#e0e0e0;color:#e0e0e0}
+.ah:hover .av{background:#ccc;color:#ccc}
+.as .av{background:none;color:#111}
+.mc{display:flex;align-items:center;gap:4px}
+.mc input{width:40px;text-align:center;border:1px solid #bbb;border-radius:3px;padding:3px 2px;font-family:inherit;font-size:.82rem;font-weight:600;color:#111;background:#fff}
+.mc input:focus{outline:none;border-color:#111}
+.mc button{width:26px;height:26px;border:1px solid #111;border-radius:3px;background:#fff;color:#111;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;font-family:inherit}
+.mc button:hover{background:#111;color:#fff}
+.rn{font-size:.65rem;color:#999;margin-right:3px;min-width:18px;display:inline-block;text-align:right}
+@media(max-width:768px){.hdr{padding:8px 10px}.tc{padding:6px 8px 30px}td{padding:6px 8px;font-size:.8rem}thead th:first-child{width:64px}thead th:nth-child(3){width:80px}thead th:nth-child(4){width:80px}.hdr h1{font-size:1rem}.btn{padding:4px 8px;font-size:.72rem}.fb{padding:3px 7px;font-size:.68rem}}
+</style>
+</head>
+<body>
+<div class="hdr">
+<div class="hdr-top"><h1>医学統計学 問題集（第4回〜第10回）</h1><div class="stats"><span id="st"></span><span id="ss"></span></div></div>
+<div class="ctrls">
+<button class="btn btn-fill" onclick="doShuffle()">シャッフル</button>
+<button class="btn" onclick="doRestore()">元の順番</button>
+<button class="btn" onclick="showAll()">解答を全て表示</button>
+<button class="btn" onclick="hideAll()">解答を全て隠す</button>
+<button class="btn" onclick="resetMiss()">間違い数リセット</button>
+</div>
+<div class="fbar">
+<span style="font-size:.74rem;color:#888;margin-right:2px">回:</span>
+<button class="fb on" data-r="all" onclick="flt('all')">全て</button>
+<button class="fb" data-r="4" onclick="flt('4')">第4回</button>
+<button class="fb" data-r="5" onclick="flt('5')">第5回</button>
+<button class="fb" data-r="6" onclick="flt('6')">第6回</button>
+<button class="fb" data-r="7" onclick="flt('7')">第7回</button>
+<button class="fb" data-r="8" onclick="flt('8')">第8回</button>
+<button class="fb" data-r="9" onclick="flt('9')">第9回</button>
+<button class="fb" data-r="10" onclick="flt('10')">第10回</button>
+</div>
+</div>
+<div class="tc"><table><thead><tr><th>回</th><th>問題</th><th>解答</th><th>間違い数</th></tr></thead><tbody id="tb"></tbody></table></div>
+<script>
+const D=[
+{r:4,q:"Q1. 「累積発症割合（Risk）」を計算する際の分母は、観察開始時点の集団全体の人数である。",a:"正"},
+{r:4,q:"Q2. 「発生レート（Incidence Rate）」は、イベント発生数を「観察期間の総和（人年）」で割ることで算出される。",a:"正"},
+{r:4,q:"Q3. 比較する群間で追跡期間（観察期間）が大きく異なる場合でも、時間を考慮しない「リスク比」を用いるのが適切である。",a:"誤"},
+{r:4,q:"Q4. 発症レート（Rate）の値は、0から無限大の範囲をとる。",a:"正"},
+{r:4,q:"Q5. 疾患の発生頻度が低い（稀な）場合、オッズ比はリスク比に近い値となる。",a:"正"},
+{r:4,q:"Q6. オッズ比（OR）が1より小さい場合、その因子とイベントには「正の相関（リスクが上がる）」があると言える。",a:"誤"},
+{r:4,q:"Q7. 一般化線形モデル（GLM）を用いて「オッズ比」を算出する場合、リンク関数には「Logit（ロジット）」を用いる。",a:"正"},
+{r:4,q:"Q8. 一般化線形モデル（GLM）を用いて「リスク比」を算出する場合、リンク関数には「Logit（ロジット）」を用いる。",a:"誤"},
+{r:4,q:"Q9. 一般化線形モデル（GLM）を用いて「レート比」を算出する場合、確率分布には「ポアソン分布」を用いる。",a:"正"},
+{r:4,q:"Q10. ポアソン回帰でレート比を解析する際、追跡時間の影響を調整するために「オフセット項」を使用する。",a:"正"},
+{r:4,q:"Q11. 一般化線形モデルにおける「オフセット項」とは、その変数の回帰係数を「0」に固定して解析することである。",a:"誤"},
+{r:4,q:"Q12. 順序ロジスティック回帰は、アウトカムが「軽症・中等症・重症」のように順序を持つカテゴリーデータの場合に用いられる。",a:"正"},
+{r:4,q:"Q13. 順序ロジスティック回帰における「比例オッズの仮定」とは、どのカットポイントで分けてもオッズ比が共通（一定）であるという仮定である。",a:"正"},
+{r:4,q:"Q14. 順序ロジスティック回帰のオッズ比は、全てのカット値で計算されたオッズ比を、症例数で重みづけ平均化したものと解釈できる。",a:"正"},
+{r:4,q:"Q15. 比例オッズ性の検定において、P値が0.05より大きく（有意差なし）、帰無仮説が棄却されなかった場合、比例オッズの仮定は「成り立っていない」と判断する。",a:"誤"},
+{r:4,q:"Q16. 一般化線形モデルで「リスク比」を解析する場合（Logリンクの二項分布）、分散にバイアスが入るのを防ぐため「ロバスト分散」の使用が推奨される。",a:"正"},
+{r:4,q:"Q17. 解析モデルに「交互作用項（例：Age * Sex）」を含めることで、性別によって年齢の効果が異なるかどうかを検討できる。",a:"正"},
+{r:4,q:"Q18. 一般化線形モデルでは、年齢などの連続変数は必ず「線形（直線）」の関係として扱わなければならず、非線形の関係を解析することはできない。",a:"誤"},
+{r:4,q:"Q19. 疫学研究において解析を行う場合、通常は研究終了時点を時間ゼロとして解析を行う。",a:"誤"},
+{r:4,q:"Q20. Framingham研究は、米国の代表的な心疾患の「前向きコホート研究」である。",a:"正"},
+{r:5,q:"1. Cox比例ハザードモデルを使用する際、群間のハザード比（HR）が観察期間を通じて常に一定でない場合は、解釈に注意が必要である。",a:"〇"},
+{r:5,q:"2. 2つの生存曲線が途中で交差している場合、比例ハザード性の仮定が崩れている可能性が高い。",a:"〇"},
+{r:5,q:"3. 比例ハザード性が保たれていない（非比例ハザード）場合、全期間を平均した一つのハザード比のみを報告するのが最も適切である。",a:"×"},
+{r:5,q:"4. ログランク検定の結果が有意（P < 0.05）であれば、比例ハザード性の仮定も自動的に満たされていることになる。",a:"×"},
+{r:5,q:"5. ハザード比が時間とともに変化する場合、観察期間を前期・後期などに分けて解析する「時間分割HR（Time-split HR）」という手法がある。",a:"〇"},
+{r:5,q:"6. Cox比例ハザード回帰において治療開始後に発生した合併症や、経過中の検査値の変化など、ベースライン時以降に事象が変化又は発生するような説明変数を「時間依存性共変量」と呼ぶ。",a:"〇"},
+{r:5,q:"7. 観察期間全てのデータを用いて治療の有無と治療後の合併症を定義して、治療と合併症の因果関係を解析すると、不死身時間バイアス（Immortal Time Bias）が生じる可能性がある。",a:"〇"},
+{r:5,q:"8. 時間依存性Cox回帰を行う場合、曝露の状態の変化の前後で時間を区分し、曝露なしの区間でイベントが発生したか、曝露ありの期間でイベントが発生したか否かを考慮し解析に反映させることができる。",a:"〇"},
+{r:5,q:"9. ランドマーク解析（Landmark Analysis）では、あらかじめ決めた特定の時点で生存している患者のみを対象に、曝露はその時点までのデータで定義し、その時点以降の予後を比較する。",a:"〇"},
+{r:5,q:"10. 「心血管死、心筋梗塞、脳卒中」を一つにまとめた「複合エンドポイント」を用いると、カプランマイヤー曲線の縦軸は「心筋梗塞なしで生存した確率」と表せる。",a:"×"},
+{r:5,q:"11. 複合エンドポイントを構成する各因子のハザード比が大きく異なる場合でも、複合エンドポイントを用いた結果は常に臨床的妥当性がある。",a:"×"},
+{r:5,q:"12. 複合エンドポイントの結果が有意であれば、その内訳（各イベント）についての説明変数の効果もすべて同様に有意であると解釈してよい。",a:"×"},
+{r:5,q:"13. 「再発」を評価したい研究で、再発前に「他病死」した症例を単なるセンサリングとして扱うと、再発のリスクを過大評価してしまう。",a:"〇"},
+{r:5,q:"14. カプランマイヤー法（1-生存率）で計算される累積発生率は、競合リスクが存在する状況では「実際よりも高い確率」を算出してしまう。",a:"〇"},
+{r:5,q:"15. 競合リスクにより累積のイベント発症率を計算した場合、グラフは必ず右肩上がりとなるグラフを用いる必要がある。",a:"〇"},
+{r:5,q:"16. Fine-Grayモデルは、競合リスクを考慮しながら、背景因子（共変量）がイベント発生率に与える影響を評価するための回帰モデルである。",a:"〇"},
+{r:5,q:"17. Fine-Grayモデルで算出されるのは「サブハザード比（Sub-distribution HR）」である。",a:"〇"},
+{r:5,q:"18. 「移植後の再発」と「移植関連死」のように、一方が起こるともう一方が起こらなくなる関係を、統計学的に「競合リスク」と呼ぶ。",a:"〇"},
+{r:5,q:"19. 生存時間解析の結果を解釈する際は、単にP値を見るだけでなく、臨床的な背景因子が適切に調整されているかを確認することが不可欠である。",a:"〇"},
+{r:5,q:"20. 生存時間解析 Part 2の目標は、カプランマイヤー法やCox回帰の限界（非比例性や競合リスク）を理解し、適切な解析手法を選択できるようになることである。",a:"〇"},
+{r:6,q:"1. 繰り返し計測されたデータ（パネルデータ）において、同じ人から測定されたデータは、他人のデータに比べて類似性がある",a:"〇"},
+{r:6,q:"2. 線形回帰の仮定条件の一つは、「すべての観察値が相関している（一人複数行のデータになっている）」ことである",a:"×"},
+{r:6,q:"3. 繰り返し計測されたデータでは、患者個体間の違い（ばらつき）を無視して解析することが推奨される",a:"×"},
+{r:6,q:"4. 繰り返し計測されたデータのばらつきは、「患者間のばらつき」と「患者内でのばらつき」の合計として考える",a:"〇"},
+{r:6,q:"5. 混合効果モデルでは横型、反復測定分散分析（R-ANOVA）では縦型に入力されたデータフォーマットを用いる",a:"×"},
+{r:6,q:"6. 「横型（一人一行）」のデータは、一部の時点が欠損していてもその症例を解析から除外せずに用いることができる",a:"×"},
+{r:6,q:"7. RのEZRを用いると、横型のデータを縦型（一人複数行）に変換する操作が可能である",a:"〇"},
+{r:6,q:"8. データのクラスタリング（どのデータが同じ個体か）を無視して解析すると、個体間の差がノイズとして残り、有意差が出にくくなる",a:"〇"},
+{r:6,q:"9. 混合効果モデルにおいて、被験者ごとに異なる切片を計算し、そのバラツキが正規分布に従うと想定するものを「固定効果」と呼ぶ",a:"×"},
+{r:6,q:"10. 混合効果モデルは、「変量（ランダム）効果」と「固定効果」を組み合わせたものである",a:"〇"},
+{r:6,q:"11. robcov関数でclusterを指定する手法は、一人一行の独立したデータにのみ適用可能な手法である",a:"×"},
+{r:6,q:"12. Predict関数を用いることで、作成したモデルから予測値を算出し、図（plot）として視覚化することができる",a:"〇"},
+{r:6,q:"13. AIC（赤池情報量基準）によるモデルの比較では、その値が大きければ大きいほど「良いモデル」と判断される",a:"×"},
+{r:6,q:"14. 薬物動態データのように動きが複雑な場合、ノット（Knot）を増やすほどモデルの当てはまりは良くなる場合があるが、増やすことが妥当かどうかはAICにより評価する",a:"〇"},
+{r:6,q:"15. 観察研究などで計測時点が人によってバラバラな場合でも、時間をカテゴリ変数として扱うことが最も適切な解析手法である",a:"×"},
+{r:7,q:"1. 多変量解析において、ある患者の「年齢」が欠損し「BMI」が観測されている場合、解析には「BMI」のデータのみが保持され計算に用いられる。これを「Complete Case Analysis」と呼ぶ。",a:"×"},
+{r:7,q:"2. データの欠損を無視して解析を行うと、解析対象となる症例数が減少するため、本来有意であるはずの差が検出されにくくなる（統計的検出力の低下）。",a:"〇"},
+{r:7,q:"3. 欠損値を無視して解析した結果、回帰係数が本来の値から変化してしまう現象は「情報バイアス」と呼ばれる。",a:"×"},
+{r:7,q:"4. 「Non-informative（ランダム）なデータの欠損」において、白血球数の欠損が入院日数（アウトカム）に影響しない場合、回帰係数には重大なバイアスが生じる。",a:"×"},
+{r:7,q:"5. 「重症な人ほど検査をよく受けてデータが残っている」という状況は、欠損の有無が患者背景に依存しているため、ランダムな欠損（Non-informative）に分類される。",a:"×"},
+{r:7,q:"6. 「Missing Completely At Random (MCAR)」とは、試験管の破損や用紙の紛失のように、データが欠損している確率が偶然以外の「何か」に依存しない状態を指す。",a:"〇"},
+{r:7,q:"7. 「Missing At Random (MAR)」とは、欠損の確率が「年齢や性別などの解析で考慮された情報」には依存せず、「解析で考慮されていない未知の情報」にのみ依存している状態を指す。",a:"×"},
+{r:7,q:"8. 欠損値を持つ患者とそうでない患者で背景を比較し、ずれていないことを示すことは、MNARであることを証明する唯一の方法である。",a:"×"},
+{r:7,q:"9. 「Missing Not At Random (MNAR)」とは、データの欠損確率が、その変数自体の未知の真の値に依存する状態を指す。",a:"〇"},
+{r:7,q:"10. 医学データのほとんどはMNARに該当するため、欠損値のあるデータは補完を行わず削除することが国際的な原則である。",a:"×"},
+{r:7,q:"11. 多重補完法（Multiple Imputation）は、データのランダムなプロセスを反映した「単一」のデータセットを生成し、その1つのデータで解析を完結させる手法である。",a:"×"},
+{r:7,q:"12. 「Predictive Mean Matching (PMM)」法では、回帰式から得られた予測値に近い観測データの中から、Bootstrapによって実際の値を補完値として決定する。",a:"〇"},
+{r:7,q:"13. Rの「aregImpute」関数で補完を行う際、引数に「nk=0」を指定することで、連続変数を「非線形（スプライン関数）」として柔軟に補完できる。",a:"×"},
+{r:7,q:"14. 「fit.mult.impute」関数において、fitterに「lrm」を指定した場合は、連続変数をアウトカムとした「線形回帰モデル」が実行される。",a:"×"},
+{r:7,q:"15. 生存時間解析の多重補完を行う際、aregImputeによる補完モデル構築時には、解析の独立性を保つため「生存時間」や「死亡の有無」を式に含めてはならない。",a:"×"},
+{r:8,q:"Q1. 感度の説明として正しいのはどれか。\nA. 病気でない人のうち検査で陰性の割合\nB. 病気の人のうち検査で陽性の割合\nC. 検査で陽性の人のうち病気の割合\nD. 検査で陰性の人のうち病気でない割合\nE. 全体の陽性率",a:"B"},
+{r:8,q:"Q2. 特異度の説明として正しいのはどれか。\nA. 病気の人のうち陽性の割合\nB. 病気でない人のうち陰性の割合\nC. 陽性の人のうち病気の割合\nD. 陰性の人のうち病気の割合\nE. 全体の陰性率",a:"B"},
+{r:8,q:"Q3. 患者が最も知りたいのはどれか。\nA. 感度\nB. 特異度\nC. 陽性的中率\nD. AUC\nE. p値",a:"C"},
+{r:8,q:"Q4. 検査後確率に影響するのはどれか。\nA. ROC曲線\nB. 検査前確率\nC. 標準誤差\nD. p値\nE. 回帰係数",a:"B"},
+{r:8,q:"Q5. ROC曲線の縦軸はどれか。\nA. 特異度\nB. 感度\nC. 陽性的中率\nD. 陰性的中率\nE. 有病率",a:"B"},
+{r:8,q:"Q6. ROC曲線の横軸はどれか。\nA. 特異度\nB. 感度\nC. 偽陽性率\nD. 有病率\nE. p値",a:"C"},
+{r:8,q:"Q7. AUCの説明として正しいのはどれか。\nA. 確率の正確さを表す\nB. 順位付けの良さを表す\nC. カットオフを表す\nD. 感度を表す\nE. 特異度を表す",a:"B"},
+{r:8,q:"Q8. AUC=0.5の意味はどれか。\nA. 完全な予測\nB. 半分正しい\nC. でたらめな予測\nD. 高精度\nE. 感度が高い",a:"C"},
+{r:8,q:"Q9. ROCから決めた最適なカットオフについて正しいのはどれか。\nA. Youden法が必ず最適である\nB. 臨床状況により変わる\nC. 1つしか存在しない\nD. 有病率に依存しない\nE. 感度と無関係",a:"B"},
+{r:8,q:"Q10. 予測モデルではどれを使うのが適切か。\nA. 単変量解析\nB. 多変量解析\nC. t検定\nD. χ²検定\nE. 平均値比較",a:"B"},
+{r:8,q:"Q11. 予測モデルの目的はどれか。\nA. 因果関係の証明\nB. 治療効果の推定\nC. 将来のリスク予測\nD. ランダム化\nE. バイアス除去",a:"C"},
+{r:8,q:"Q12. 新しいマーカーの評価として適切なのはどれか。\nA. マーカー単独で評価\nB. 既存モデルと比較\nC. p値のみで判断\nD. 感度のみで評価\nE. 特異度のみで評価",a:"B"},
+{r:8,q:"Q13. D-dimerを追加した場合に期待されるのはどれか。\nA. 予測の改善\nB. 必ず感度上昇\nC. 必ず特異度上昇\nD. 因果関係証明\nE. 有病率変化",a:"A"},
+{r:8,q:"Q14. Calibrationとはどれか。\nA. 順位の正しさ\nB. 確率の正しさ\nC. カットオフ\nD. 感度\nE. 特異度",a:"B"},
+{r:8,q:"Q15. 正しい組み合わせはどれか。\nA. ROC＝確率の正確さ\nB. Calibration＝順位\nC. ROC＝識別能\nD. Calibration＝感度\nE. ROC＝有病率",a:"C"},
+{r:8,q:"Q16. 良い再分類はどれか。\nA. アウトカムが起こった人でのリスク低下\nB. アウトカムが起こった人でのリスク上昇\nC. アウトカムが起こっていない人のリスク上昇\nD. 全員同じ\nE. 無関係",a:"B"},
+{r:8,q:"Q17. NRIの意味はどれか。\nA. ROCの面積\nB. 再分類の改善\nC. 校正\nD. 感度\nE. 特異度",a:"B"},
+{r:8,q:"Q18. IDIの説明として正しいのはどれか。\nA. 感度の変化\nB. 特異度の変化\nC. 平均予測確率の改善\nD. カットオフ\nE. p値",a:"C"},
+{r:8,q:"Q19. AUCだけでは分からないものはどれか。\nA. 識別能\nB. 順位\nC. 確率の正しさ\nD. ROC曲線\nE. 感度",a:"C"},
+{r:8,q:"Q20. Calibrationでわかることはどういうことか。\nA. 順位が正しい\nB. 予測した確率どおりに実際に発症している\nC. 感度が高い\nD. 特異度が高い\nE. AUCが高い",a:"B"},
+{r:9,q:"Q1. 臨床研究において、因果関係を統計学的に調べる一連の学問・手法を何と呼ぶか。\nA. 因果記述\nB. 因果推論\nC. 相関分析\nD. 予測モデリング",a:"B"},
+{r:9,q:"Q2. 「もし現実とは異なる選択をしていたら、未来はどうなっていたか」という観察不可能なシチュエーションを指す用語はどれか。\nA. 反事実（Counterfactual）\nB. 疑似事実（Quasi-fact）\nC. 仮想中間体（Virtual Intermediate）\nD. 非対称相関（Asymmetric Correlation）",a:"A"},
+{r:9,q:"Q3. 因果推論の根本的な限界を克服するために、観察研究の解析で通常行われるアプローチとして最も適切なものはどれか。\nA. タイムマシーンを想定したシミュレーションモデルを組む\nB. 対象患者と「よく似た背景を持つ人（集団）」を対照群として作り、集団間で比較する\nC. 過去の文献の平均値のみを基準としてそのまま当てはめる\nD. 因果関係の証明を諦め、相関関係（P値）のみで結論付ける",a:"B"},
+{r:9,q:"Q4. 未知の因子も含めて治療群と非治療群の背景因子を完全に均一にするための最も強力な研究デザインはどれか。\nA. 多施設共同前向き観察研究\nB. 傾向スコア付きコホート研究\nC. 無作為化（ランダム化）\nD. 後ろ向きケースコントロール研究",a:"C"},
+{r:9,q:"Q5. 二者の間に直接の因果関係がないのに、第三の因子の影響で関係があるように見える「見せかけの相関」を引き起こす因子を何と呼ぶか。\nA. 媒介因子（中間因子）\nB. 交絡因子\nC. 独立因子\nD. 抑制因子",a:"B"},
+{r:9,q:"Q6. 「交絡（Confounding）」が成立するための必須条件の組み合わせとして正しいものはどれか。\n①アウトカムに対して因果関係を持つ ②分布が比較群間で異なっている ③中間因子ではない\nA. ①のみ\nB. ①と②\nC. ②と③\nD. ①②③すべて",a:"D"},
+{r:9,q:"Q7. アスピリンの観察研究で「交絡の調整法」の違いによる解析結果の記述として正しいものはどれか。\nA. 調整なしの段階でアスピリン群の死亡リスクは有意に低かった\nB. 多変量Cox回帰で調整するとアスピリン群の死亡リスクが有意に高かった\nC. 傾向スコアマッチングとIPTWで算出されたHRやP値は完全に一致した\nD. 調整なしではHR=4.01と高く見えたが、適切に調整するとリスクの有意な差は消失した",a:"D"},
+{r:9,q:"Q8. アスピリン観察研究で未調整の解析ではアスピリン使用群の死亡リスクが高く検出された。この臨床的な理由として正しいものはどれか。\nA. アスピリンには強力な致死性の副作用があるため\nB. もともと死亡リスクが高い重症患者にアスピリンが多く処方されていたため\nC. 対照群の患者が全員きわめて若く健康であったため\nD. アスピリン群の患者だけが全員喫煙を開始したため",a:"B"},
+{r:9,q:"Q9. 「傾向スコア（Propensity Score）」の根本的な定義として最も適切なものはどれか。\nA. 治療を行った結果、患者の病気が完治する確率\nB. 患者のベースライン背景情報をもとに、治療を受ける傾向を確率で表したもの\nC. 多変量回帰分析でその変数が有意（P<0.05）となる確率\nD. 生存時間解析で患者が途中で脱落する確率",a:"B"},
+{r:9,q:"Q10. 傾向スコアを算出する際、目的変数を「治療の有無」として実行される一般的な多変量解析モデルはどれか。\nA. 線形回帰モデル\nB. 二値ロジスティック回帰モデル\nC. Cox比例ハザード回帰モデル\nD. パス解析（構造方程式モデリング）",a:"B"},
+{r:9,q:"Q11. 「傾向スコアマッチング法」の基本的な仕組みとして正しいものはどれか。\nA. 年齢と性別が完全一致する患者を機械的にペアにする\nB. 傾向スコアが近い患者同士を群間でマッチさせ、ペアがいる患者のみを解析対象とする\nC. 治療群全員に非治療群の患者を均等に3人ずつ割り当てる\nD. アウトカムが発生した患者のみを抽出してマッチさせる",a:"B"},
+{r:9,q:"Q12. 傾向スコアマッチングのマッチング許容幅を指定する設定項目を何と呼ぶか。\nA. キャリパー幅（caliper = 0.2）\nB. カーネル幅（kernel = 0.2）\nC. トリミング幅（trim = 0.2）\nD. マッチング半径（radius = 0.2）",a:"A"},
+{r:9,q:"Q13. 傾向スコアマッチング法は別名何と呼ばれるか。\nA. 擬似無作為化（疑似ランダム化）手法\nB. 半自動多変量手法\nC. 完全客観的記述手法\nD. 後ろ向き均一化手法",a:"A"},
+{r:9,q:"Q14. 傾向スコアマッチング法の最大のデメリットとして指摘されている点はどれか。\nA. 計算誤差が多変量解析より大きくなる\nB. ペアがいない患者が除外され症例数が大きく減少する\nC. 連続変数を投入できなくなる\nD. HRが必ず1.0に近づき有意差が出にくくなる",a:"B"},
+{r:9,q:"Q15. 「症例数を減らさない」ために用いられる手法を何と呼ぶか。\nA. 傾向スコア層別化法\nB. 傾向スコア共変量調整法\nC. 傾向スコア逆数重み法（IPTW）\nD. 傾向スコア交互作用法",a:"C"},
+{r:9,q:"Q16. IPTWのATE法とは何か。\nA. ATT法\nB. ATE（Average Treatment Effect）法\nC. ATU法\nD. ATM法",a:"B"},
+{r:9,q:"Q17. 症例数を実際の数に戻すための重みを何と呼ぶか。\nA. 標準化重み\nB. 安定化重み（Stabilized IPTW：sIPTW）\nC. ロバスト重み\nD. 縮小重み",a:"B"},
+{r:9,q:"Q18. IPTWで最終的なアウトカムモデルを計算する際、必ず行うべき統計学的処理はどれか。\nA. ステップワイズ変数減少法\nB. 標準誤差のロバスト推定（ロバスト分散推定）\nC. P値のボンフェローニ補正\nD. データの対数変換",a:"B"},
+{r:9,q:"Q19. EPVのルールについて、生存率解析（Cox比例ハザード回帰）における適切な目安はどれか。\nA. 総症例数 ÷ 15\nB. イベント発生した人数 ÷ 10\nC. 人数の小さい方の群の人数 ÷ 10\nD. 背景因子の総数 ÷ 2",a:"B"},
+{r:9,q:"Q20. 傾向スコア計算時のロジスティック回帰に「入れてはいけない」ものはどれか。\nA. 年齢や性別などの基本属性\nB. 治療介入前に測定された既往歴や合併症\nC. 治療介入後に発生した臨床検査値などの「媒介変数（中間因子）」\nD. アウトカムに対して強い因果関係を持つリスク因子",a:"C"},
+{r:10,q:"問1. 生成AI（ChatGPT）に関する説明として最も適切なのはどれか。\nA. 因果関係を完全に理解して文章を作成している\nB. 次に来る単語の確率を予測している\nC. Validationを必要としない\nD. 統計学とは無関係である",a:"B"},
+{r:10,q:"問2. 過学習（Overfitting）の説明として最も適切なのはどれか。\nA. 学習データにも新規データにも当てはまりが悪い状態\nB. 学習データには当てはまりが悪いが新規データには良い状態\nC. 学習データには非常によく当てはまるが新規データでは性能が低下する状態\nD. 説明変数が少なすぎてモデルが単純になりすぎた状態",a:"C"},
+{r:10,q:"問3. 予測モデルのValidationを行う主な目的として最も適切なのはどれか。\nA. P値を小さくするため\nB. 新しいデータに対する予測性能を評価するため\nC. 説明変数を増やすため\nD. 回帰係数を有意にするため",a:"B"},
+{r:10,q:"問4. ROC曲線に関する説明として正しいのはどれか。\nA. 横軸は感度である\nB. 縦軸は1−特異度である\nC. AUCが1に近いほど予測性能が高い\nD. AUCが0に近いほど予測性能が高い",a:"C"},
+{r:10,q:"問5. 過学習が最も起こりやすい状況はどれか。\nA. 症例数1000、説明変数2個\nB. 症例数500、説明変数3個\nC. 症例数100、説明変数50個\nD. 症例数5000、説明変数5個",a:"C"},
+{r:10,q:"問6. ロジスティック回帰モデルにおけるEPVの説明として最も適切なのはどれか。\nA. 総症例数÷15\nB. イベントあり群と無し群のうち小さい方の人数÷10\nC. 説明変数の数÷症例数\nD. ROC曲線の傾き",a:"B"},
+{r:10,q:"問7. Split-data法に関する説明として正しいのはどれか。\nA. 学習用データと検証用データは同一である\nB. 全データを検証用データとして使用する\nC. 学習用データでモデルを構築し別の検証用データで性能を評価する\nD. 必ず外部データが必要である",a:"C"},
+{r:10,q:"問8. 10分割クロスバリデーションについて正しいのはどれか。\nA. 毎回同じ10%のみを検証に用いる\nB. 各症例は1回も検証用データに含まれない\nC. 各症例は1回だけ検証用データとして使用される\nD. Validationは行わない",a:"C"},
+{r:10,q:"問9. ブートストラップ法について正しいのはどれか。\nA. Sampling without replacementを用いる\nB. 外部施設データを必須とする\nC. 復元抽出によって疑似データセットを多数作成する\nD. 1回だけサンプリングを行う",a:"C"},
+{r:10,q:"問10. 外部Validationの例として最も適切なのはどれか。\nA. 同じ患者データで再解析する\nB. 同じ施設の同じ患者を繰り返し学習する\nC. 学習に用いていない別病院の患者データで性能評価する\nD. ROC曲線を描かずにP値のみを計算する",a:"C"},
+];
+let miss=JSON.parse(localStorage.getItem('ms')||'{}');
+let orig=D.map((d,i)=>({...d,idx:i}));
+let dd=[...orig];
+let hid=true;
+let cf='all';
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function saveMiss(){localStorage.setItem('ms',JSON.stringify(miss))}
+function render(){
+const tb=document.getElementById('tb');
+const f=cf==='all'?dd:dd.filter(d=>String(d.r)===cf);
+document.getElementById('st').textContent='全 '+D.length+' 問';
+document.getElementById('ss').textContent='表示: '+f.length+' 問';
+tb.innerHTML=f.map((d,i)=>{
+const ac=hid?'ah':'as';
+const m=miss[d.idx]||0;
+const ql=d.q.split('\n').map(l=>esc(l)).join('\n');
+return '<tr><td><span class="rn">'+(i+1)+'</span><span class="rb">第'+d.r+'回</span></td><td><div class="qt">'+ql+'</div></td><td class="ac '+ac+'" onclick="tog(this)"><div class="av">'+esc(d.a)+'</div></td><td><div class="mc"><input type="number" min="0" value="'+m+'" onchange="setM('+d.idx+',this.value)" onclick="event.stopPropagation()"><button onclick="addM('+d.idx+');event.stopPropagation()">+</button></div></td></tr>';
+}).join('');
+}
+function tog(c){c.classList.toggle('ah');c.classList.toggle('as')}
+function showAll(){hid=false;document.querySelectorAll('.ac').forEach(c=>{c.classList.remove('ah');c.classList.add('as')})}
+function hideAll(){hid=true;document.querySelectorAll('.ac').forEach(c=>{c.classList.add('ah');c.classList.remove('as')})}
+function doShuffle(){for(let i=dd.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[dd[i],dd[j]]=[dd[j],dd[i]]}hid=true;render()}
+function doRestore(){dd=[...orig];hid=true;render()}
+function flt(r){cf=r;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));document.querySelector('.fb[data-r="'+r+'"]').classList.add('on');hid=true;render()}
+function addM(idx){miss[idx]=(miss[idx]||0)+1;saveMiss();render()}
+function setM(idx,v){const n=parseInt(v)||0;miss[idx]=Math.max(0,n);saveMiss();render()}
+function resetMiss(){miss={};saveMiss();render()}
+render();
+</script>
+</body>
+</html>
